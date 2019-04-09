@@ -6,6 +6,8 @@ import aiohttp
 from .exceptions import XIVAPIBadRequest, XIVAPIForbidden, XIVAPINotFound, XIVAPIServiceUnavailable, XIVAPIInvalidLanguage, XIVAPIErrorOrLodestoneMaintenance, XIVAPIInvalidIndex, XIVAPIInvalidColumns, XIVAPIInvalidWorlds, XIVAPIInvalidDatacenter
 from .decorators import timed
 
+from .models.types import Index, Search, Result
+
 __log__ = logging.getLogger(__name__)
 
 
@@ -256,7 +258,8 @@ class Client:
             raise XIVAPIInvalidLanguage(f'"{language}" is not a valid language code for XIVAPI.')
 
         if len(columns) == 0:
-            raise XIVAPIInvalidColumns("Please specify at least one column to return in the resulting data.")
+            columns = Result.columns()
+            # raise XIVAPIInvalidColumns("Please specify at least one column to return in the resulting data.")
 
         params = {
             "private_key": self.api_key,
@@ -283,7 +286,7 @@ class Client:
 
         url = f'{self.base_url}/search'
         async with self.session.get(url, params=params) as response:
-            return await self.process_response(response)
+            return Search(self, **await self.process_response(response))
 
 
     @timed
@@ -307,7 +310,8 @@ class Client:
             raise XIVAPIInvalidIndex("Please specify an index to search on, e.g. \"Item\"")
 
         if len(columns) == 0:
-            raise XIVAPIInvalidColumns("Please specify at least one column to return in the resulting data.")
+            columns = Index.types[index.lower()].columns()
+            # raise XIVAPIInvalidColumns("Please specify at least one column to return in the resulting data.")
 
         params = {
             "private_key": self.api_key,
@@ -319,7 +323,7 @@ class Client:
 
         url = f'{self.base_url}/{index}/{content_id}'
         async with self.session.get(url, params=params) as response:
-            return await self.process_response(response)
+            return Index.types[index.lower()](self, **await self.process_response(response))
 
 
     @timed
