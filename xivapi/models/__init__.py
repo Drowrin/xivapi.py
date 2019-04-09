@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict
 
 __all__ = ['Elem', 'Model']
 
@@ -43,7 +43,7 @@ class Model:
                             a = [transform(d) for d in data]
                     else:
                         if issubclass(transform, Model):
-                            a = transform(self.client, _dct=data)
+                            a = transform(self.client, data)
                         else:
                             a = transform(data)
                     setattr(self, name, a)  # if the key exists, set the transformed data
@@ -55,12 +55,13 @@ class Model:
         """called when anything subclasses Model, lets us process the attributes"""
         super().__init_subclass__()
         # filter to only Elems
-        cls.attrs = {k: v for k, v in cls.__dict__.items() if isinstance(v, Elem)}
         cls.attrs = {}
-        for k, a in cls.__annotations__.items():
-            e = getattr(cls, k)
-            e.transform = a
-            cls.attrs[k] = e
+        for k, e in cls.__dict__.items():
+            if isinstance(e, Elem):
+                a = cls.__annotations__.get(k, None)
+                if a is not None:
+                    e.transform = a
+                cls.attrs[k] = e
 
     def __repr__(self):
         repr_attrs = [

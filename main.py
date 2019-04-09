@@ -16,10 +16,7 @@ async def main():
 
         print(i)
 
-        item = await client.index_by_id(
-            index="Item",
-            content_id=i['Results'][0]['ID'],
-        )
+        item = await i.results[0].get()
 
         print(item)
 

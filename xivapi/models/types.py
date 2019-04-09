@@ -23,7 +23,7 @@ class Result(Model):
     async def get(self):
         t = Index.types[self.url.split('/')[1].lower()]
         async with self.client.session.get(f'https://xivapi.com{self.url}') as r:
-            return t(**await r.json())
+            return t(self.client, **await r.json())
 
 
 class Search(Model):
