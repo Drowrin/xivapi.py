@@ -1,10 +1,12 @@
-from xivapi.models import Model, Elem
-from typing import Dict
+from .base import *
 
-__all__ = ['Pagination', 'Result', 'Search', 'Item', 'Recipe']
+
+__all__ = ['Pagination', 'Result', 'Search', 'BaseParam', 'Item', 'Recipe']
 
 
 class Pagination(Model):
+    __repr_attrs__ = ['results_total']
+
     page: int = Elem('Page')
     page_next: int = Elem('PageNext')
     page_prev: int = Elem('PagePrev')
@@ -27,23 +29,16 @@ class Result(Model):
 
 
 class Search(Model):
+    __repr_attrs__ = ['pagination', 'results']
     pagination: Pagination = Elem('Pagination')
-    results: [Result] = Elem('Results')
+    results: Result = ElemList('Results')
 
 
-class Index:
-    """
-    Represents something that can be accessed at a /index/id endpoint.
-    Subclassing this simply adds it to a dict so it can be looked up later.
-    This lets Result.get() work for example.
-    Could add more in the future
-    """
-    types: Dict[str, type] = {}
-
-    @classmethod
-    def __init_subclass__(cls):
-        super().__init_subclass__()
-        Index.types[cls.__name__.lower()] = cls
+class BaseParam(Index, Model):
+    id: int = Elem('ID')
+    name: str = Elem('Name')
+    description: str = Elem('Description')
+    url: str = Elem('Url')
 
 
 class Item(Index, Model):
@@ -51,6 +46,8 @@ class Item(Index, Model):
     name: str = Elem('Name')
     description: str = Elem('Description')
     icon: str = Elem('Icon')
+
+    params: BaseParam = ElemGroup('BaseParam*')[0:5]
 
 
 class Recipe(Index, Model):

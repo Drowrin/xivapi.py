@@ -2,23 +2,26 @@ import asyncio
 import aiohttp
 import xivapi
 
-api_key = ''
 
-
-async def main():
+async def main(api_key):
     async with aiohttp.ClientSession() as session:
         client = xivapi.Client(session, api_key)
 
-        i = await client.index_search(
-            name='Infusion of Strength',
+        i_search = await client.index_search(
+            name='Curtana',
             indexes=['Item']
         )
+        print(i_search)
 
-        print(i)
-
-        item = await i.results[0].get()
-
+        item = await i_search.results[0].get()
         print(item)
+        # await asyncio.sleep(.1)
+        print(item.params)
+
+
+def run(s):
+    asyncio.get_event_loop().run_until_complete(main(s))
+
 
 if __name__ == '__main__':
-    asyncio.get_event_loop().run_until_complete(main())
+    run('')
